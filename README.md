@@ -1,4 +1,4 @@
-# Ember-deploy-ssh
+# Ember-deploy-ssh-index
 
 This README outlines the details of collaborating on this Ember addon.
 
