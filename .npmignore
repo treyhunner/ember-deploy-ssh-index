@@ -1,7 +1,4 @@
-tests/
-
 .editorconfig
 .travis.yml
 .npmignore
 **/.gitkeep
-testem.json
