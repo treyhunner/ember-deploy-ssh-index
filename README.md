@@ -58,7 +58,7 @@ var app = new EmberApp({
 
 * Deploy to production: `ember deploy -e production`
 * List deployed revisions: `ember deploy:list -e production`
-* Activate a revision: `ember deploy:activate --revision <tag> -e production`
+* Activate a revision: `ember deploy:activate --revision $TAG -e production` (where `$TAG` is the tag name)
 
 ## Running Tests
 
