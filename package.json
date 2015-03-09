@@ -3,13 +3,12 @@
   "version": "0.0.1",
   "description": "The default blueprint for ember-cli addons.",
   "directories": {
-    "doc": "doc",
-    "test": "tests"
+    "doc": "doc"
   },
   "scripts": {
     "start": "ember server",
     "build": "ember build",
-    "test": "ember test"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": "https://github.com/treyhunner/ember-deploy-ssh-index/",
   "engines": {
@@ -38,9 +37,6 @@
     "ember-addon",
     "ember-cli-deploy-plugin"
   ],
-  "ember-addon": {
-    "configPath": "tests/dummy/config"
-  },
   "dependencies": {
     "core-object": "^1.1.0",
     "ssh2": "^0.4.4"
