@@ -12,14 +12,14 @@ To use this plugin, set `type` to `"ssh"` in your [ember-cli-deploy][] configura
 
 The following configuration options are supported by this plugin:
 
-- `host`: SSH host server (e.g. myserver.com)
-- `username`: SSH user (e.g. root)
-- `remoteDir`: Remote directory to upload index pages (e.g. /var/www)
-- `privateKeyFile`: local private key file to use for SSH connection (e.g. /home/user/.ssh/id_rsa)
+- `host`: SSH host server
+- `username`: SSH user
+- `remoteDir`: Remote directory to upload index pages
+- `privateKeyFile`: local private key file to use for SSH connection
 
 To set configuration variables, follow the instructions in the [ember-cli-deploy][] documentation.
 
-Example `config/deploy.js` file using ember-deploy-ssh-index with [ember-deploy-s3][]:
+Example `config/deploy.js` file using ember-deploy-ssh-index with [ember-deploy-s3][] and environment variables to store the private key file and AWS information:
 
 ```
 /* jshint node: true */
@@ -31,7 +31,7 @@ module.exports = {
       remoteDir: "/var/www/",
       host: "example.com",
       username: "root",
-      privateKeyFile: process.env.SSH_KEY_FILE,
+      privateKeyFile: process.env.SSH_KEY_FILE,  # Example: /home/user/.ssh/id_rsa
     },
     assets: {
       type: "s3",
