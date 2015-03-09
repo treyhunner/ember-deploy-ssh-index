@@ -61,5 +61,11 @@ var app = new EmberApp({
 * Activate a revision: `ember deploy:activate --revision $TAG -e production` (where `$TAG` is the tag name)
 
 
+# License
+
+This is released under an [MIT license][].
+
+
 [ember-cli-deploy]: https://github.com/ember-cli/ember-cli-deploy
 [ember-deploy-s3]: https://github.com/LevelbossMike/ember-deploy-s3
+[mit license]: http://th.mit-license.org/
