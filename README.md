@@ -45,11 +45,13 @@ module.exports = {
 
 You will probably need to prefix your static asset links with a URL based on your asset deploy plugin.  For example if you are using [ember-deploy-s3][] with a bucket named `assets.example.com` you might fingerprint like this:
 
+```
 var app = new EmberApp({
   fingerprint: {
     prepend: 'https://s3.amazonaws.com/assets.example.com/',
   },
 });
+```
 
 
 ## Usage
