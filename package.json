@@ -8,7 +8,7 @@
   "scripts": {
     "start": "ember server",
     "build": "ember build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/mocha/bin/mocha -u tdd ./node_tests/"
   },
   "repository": "https://github.com/treyhunner/ember-deploy-ssh-index/",
   "engines": {
@@ -31,7 +31,9 @@
     "ember-data": "1.0.0-beta.14.1",
     "ember-export-application-global": "^1.0.2",
     "express": "^4.8.5",
-    "glob": "^4.0.5"
+    "glob": "^4.0.5",
+    "mocha": "^2.2.1",
+    "proxyquire": "^1.4.0"
   },
   "keywords": [
     "ember-addon",
