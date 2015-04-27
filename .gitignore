@@ -10,6 +10,6 @@
 # misc
 /.sass-cache
 /connect.lock
-/coverage/*
+coverage.html
 /libpeerconnection.log
 npm-debug.log
