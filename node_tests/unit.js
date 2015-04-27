@@ -9,12 +9,30 @@ var inherits = require('util').inherits;
 var proxyquire = require('proxyquire');
 var MockUI = require('ember-cli/tests/helpers/mock-ui');
 
-var MockClient = function () { };
+var MockClient = function () {
+  this.config = stubConfig;
+};
 
 inherits(MockClient, EventEmitter);
 
-MockClient.prototype.connect = function () {
-  throw Error("TODO Do something");
+MockClient.prototype.connect = function (config) {
+  assert.equal(config.host, this.config.host);
+  assert.equal(config.username, this.config.username);
+  this.emit('ready');
+};
+
+MockClient.prototype.end = function () {
+};
+
+MockClient.prototype.sftp = function (func) {
+  func(null, new MockSFTP());
+};
+
+var MockSFTP = function () { };
+
+MockSFTP.prototype.readdir = function (dir, func) {
+  assert.equal(dir, stubConfig.remoteDir);
+  func(null, fileList);
 };
 
 var mockSSH2 = {
@@ -37,6 +55,7 @@ var stubConfig = {
   remoteDir: 'remoteDir',
   privateKeyFile: './node_tests/fixtures/privateKeyFile.txt',
 };
+var fileList;
 
 suite('list', function () {
 
@@ -49,7 +68,9 @@ suite('list', function () {
   });
 
   test('no files', function () {
-    console.log(adapter.list());
+    fileList = [];
+    adapter.list();
+    assert.equal(adapter.ui.output, '');
   });
 
 });
