@@ -8,7 +8,7 @@
   "scripts": {
     "start": "ember server",
     "build": "ember build",
-    "test": "multi='dot=- html-cov=coverage.html' ./node_modules/mocha/bin/mocha -R mocha-multi --no-colors -u tdd ./node_tests/"
+    "test": "multi='dot=- html-cov=coverage.html' mocha -R mocha-multi --no-colors -u tdd ./node_tests/"
   },
   "config": {
     "blanket": {
