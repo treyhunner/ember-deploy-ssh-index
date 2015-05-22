@@ -1,8 +1,8 @@
 /* jshint node: true */
 'use strict';
+require('blanket')();
 
 var assert = require('assert');
-var blanket = require('blanket')();
 var CoreObject = require('core-object');
 var EventEmitter = require('events').EventEmitter;
 var inherits = require('util').inherits;
