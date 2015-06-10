@@ -98,4 +98,39 @@ suite('list', function () {
     });
   });
 
+  test('index file', function (done) {
+    fileList = [{
+      filename: 'file.html',
+      attrs: {mtime: new Date()},
+    }, {
+      filename: 'index.html',
+      attrs: {mtime: new Date()},
+    }];
+    adapter.list().then(function () {
+      assert.equal(adapter.ui.output, '\nFound the following revisions:\n\nfile\n\n');
+      done();
+    }).catch(function (error) {
+      done(error);
+    });
+  });
+
+  test('multiple files', function (done) {
+    fileList = [{
+      filename: 'file1.html',
+      attrs: {mtime: new Date(2000, 1, 2)},
+    }, {
+      filename: 'file2.html',
+      attrs: {mtime: new Date(2000, 1, 3)},
+    }, {
+      filename: 'file3.html',
+      attrs: {mtime: new Date(2000, 1, 1)},
+    }];
+    adapter.list().then(function () {
+      assert.equal(adapter.ui.output, '\nFound the following revisions:\n\nfile2\nfile1\nfile3\n\n');
+      done();
+    }).catch(function (error) {
+      done(error);
+    });
+  });
+
 });
