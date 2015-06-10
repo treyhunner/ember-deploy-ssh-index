@@ -49,6 +49,7 @@ You will probably need to prefix your static asset links with a URL based on you
 var app = new EmberApp({
   fingerprint: {
     prepend: 'https://s3.amazonaws.com/assets.example.com/',
+    enabled: true
   },
 });
 ```
