@@ -35,6 +35,14 @@ MockSFTP.prototype.readdir = function (dir, func) {
   func(null, fileList);
 };
 
+MockSFTP.prototype.unlink = function (file, func) {
+  func(null);
+};
+
+MockSFTP.prototype.symlink = function (file, func) {
+  func(null);
+};
+
 var mockSSH2 = {
   Client: MockClient,
 };
@@ -67,10 +75,27 @@ suite('list', function () {
     });
   });
 
-  test('no files', function () {
+  test('no files', function (done) {
     fileList = [];
-    adapter.list();
-    assert.equal(adapter.ui.output, '');
+    adapter.list().then(function () {
+      assert.equal(adapter.ui.output, '\nFound the following revisions:\n\n\n\n');
+      done();
+    }).catch(function (error) {
+      done(error);
+    });
+  });
+
+  test('one file', function (done) {
+    fileList = [{
+      filename: 'somerev.html',
+      attrs: {mtime: new Date()},
+    }];
+    adapter.list().then(function () {
+      assert.equal(adapter.ui.output, '\nFound the following revisions:\n\nsomerev\n\n');
+      done();
+    }).catch(function (error) {
+      done(error);
+    });
   });
 
 });
