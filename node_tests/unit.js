@@ -28,7 +28,23 @@ MockClient.prototype.sftp = function (func) {
   func(null, new MockSFTP());
 };
 
+var MockStream = function () {
+  this.config = stubConfig;
+};
+
+inherits(MockStream, EventEmitter);
+
+MockStream.prototype.write = function (value) {
+  assert.equal(value, fileContents);
+  this.emit('finish');
+};
+
 var MockSFTP = function () { };
+
+MockSFTP.prototype.createWriteStream = function (filename) {
+  assert.equal(filename, filePath);
+  return new MockStream();
+};
 
 MockSFTP.prototype.readdir = function (dir, func) {
   assert.equal(dir, stubConfig.remoteDir);
@@ -60,9 +76,11 @@ var adapter;
 var stubConfig = {
   host: 'host',
   username: 'username',
-  remoteDir: 'remoteDir',
+  remoteDir: 'remoteDir/',
   privateKeyFile: './node_tests/fixtures/privateKeyFile.txt',
 };
+var fileContents;
+var filePath = 'remoteDir/000000.html';
 var fileList;
 
 suite('list', function () {
@@ -143,6 +161,7 @@ suite('upload', function () {
       config: stubConfig,
       taggingAdapter: new MockTaggingAdapter(),
     });
+    fileContents = 'file contents';
   });
 
   test('already uploaded', function (done) {
@@ -150,9 +169,22 @@ suite('upload', function () {
       filename: '000000.html',
       attrs: {mtime: new Date()},
     }];
-    adapter.upload().catch(function (error) {
+    adapter.upload(fileContents).catch(function (error) {
       assert.equal(error.name, 'SilentError');
       assert.equal(error.message, 'Revision already uploaded.');
+      done();
+    }).catch(function (error) {
+      done(error);
+    });
+  });
+
+  test('successful', function (done) {
+    fileList = [{
+      filename: '000001.html',
+      attrs: {mtime: new Date()},
+    }];
+    adapter.upload(fileContents).then(function () {
+      assert.equal(adapter.ui.output, '');
       done();
     }).catch(function (error) {
       done(error);
