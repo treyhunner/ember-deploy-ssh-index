@@ -134,3 +134,29 @@ suite('list', function () {
   });
 
 });
+
+suite('upload', function () {
+
+  setup(function() {
+    adapter = new SSHAdapter({
+      ui: new MockUI(),
+      config: stubConfig,
+      taggingAdapter: new MockTaggingAdapter(),
+    });
+  });
+
+  test('already uploaded', function (done) {
+    fileList = [{
+      filename: '000000.html',
+      attrs: {mtime: new Date()},
+    }];
+    adapter.upload().catch(function (error) {
+      assert.equal(error.name, 'SilentError');
+      assert.equal(error.message, 'Revision already uploaded.');
+      done();
+    }).catch(function (error) {
+      done(error);
+    });
+  });
+
+});
