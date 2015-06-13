@@ -13,6 +13,10 @@ before_install:
 
 install:
   - npm install
+  - npm install codecov.io@0.1.2 mocha-lcov-reporter@0.0.2
 
 script:
   - npm test
+
+after_success:
+  ./node_modules/.bin/mocha -R mocha-lcov-reporter -u tdd ./node_tests | sed 's@SF:@SF:lib/@' | ./node_modules/.bin/codecov
