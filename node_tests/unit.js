@@ -9,7 +9,22 @@ var inherits = require('util').inherits;
 var proxyquire = require('proxyquire');
 var MockUI = require('ember-cli/tests/helpers/mock-ui');
 
-var MockClient = function () {
+var adapter;
+var stubConfig = {
+  host: 'host',
+  username: 'username',
+  remoteDir: 'remoteDir/',
+  privateKeyFile: './node_tests/fixtures/privateKeyFile.txt',
+};
+var fileContents;
+var filePath = 'remoteDir/000000.html';
+var fileList;
+var unlinkedFile;
+var linkedFile;
+
+var MockClient, MockStream, MockSFTP, MockTaggingAdapter;
+
+MockClient = function () {
   this.config = stubConfig;
 };
 
@@ -28,7 +43,7 @@ MockClient.prototype.sftp = function (func) {
   func(null, new MockSFTP());
 };
 
-var MockStream = function () {
+MockStream = function () {
   this.config = stubConfig;
 };
 
@@ -39,7 +54,7 @@ MockStream.prototype.write = function (value) {
   this.emit('finish');
 };
 
-var MockSFTP = function () { };
+MockSFTP = function () { };
 
 MockSFTP.prototype.createWriteStream = function (filename) {
   assert.equal(filename, filePath);
@@ -62,31 +77,19 @@ MockSFTP.prototype.symlink = function (source, destination, func) {
   func(null);
 };
 
-var mockSSH2 = {
-  Client: MockClient,
-};
-
-var MockTaggingAdapter = CoreObject.extend({
+MockTaggingAdapter = CoreObject.extend({
   createTag: function() {
     return '000000';
   },
 });
 
+var mockSSH2 = {
+  Client: MockClient,
+};
+
 var SSHAdapter = proxyquire('../lib/ssh-adapter', {
   'ssh2': mockSSH2,
 });
-var adapter;
-var stubConfig = {
-  host: 'host',
-  username: 'username',
-  remoteDir: 'remoteDir/',
-  privateKeyFile: './node_tests/fixtures/privateKeyFile.txt',
-};
-var fileContents;
-var filePath = 'remoteDir/000000.html';
-var fileList;
-var unlinkedFile;
-var linkedFile;
 
 suite('list', function () {
 
