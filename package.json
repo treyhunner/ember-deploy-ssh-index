@@ -13,6 +13,9 @@
   "config": {
     "blanket": {
       "pattern": "///[\\w-]+\\.js$/",
+      "data-cover-flags": {
+        "branchTracking": true
+      },
       "data-cover-never": [
         "node_modules",
         "public"
