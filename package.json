@@ -46,6 +46,7 @@
     "express": "^4.8.5",
     "glob": "^4.0.5",
     "mocha": "^2.2.1",
+    "mocha-multi": "^0.7.1",
     "proxyquire": "^1.4.0"
   },
   "keywords": [
