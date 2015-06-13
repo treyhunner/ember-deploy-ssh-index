@@ -104,7 +104,8 @@ suite('list', function () {
   test('no files', function (done) {
     fileList = [];
     adapter.list().then(function () {
-      assert.equal(adapter.ui.output, '\nFound the following revisions:\n\n\n\n');
+      assert.equal(adapter.ui.output,
+                   '\nFound the following revisions:\n\n\n\n');
       done();
     }).catch(function (error) {
       done(error);
@@ -117,7 +118,8 @@ suite('list', function () {
       attrs: {mtime: new Date()},
     }];
     adapter.list().then(function () {
-      assert.equal(adapter.ui.output, '\nFound the following revisions:\n\nsomerev\n\n');
+      assert.equal(adapter.ui.output,
+                   '\nFound the following revisions:\n\nsomerev\n\n');
       done();
     }).catch(function (error) {
       done(error);
@@ -133,7 +135,8 @@ suite('list', function () {
       attrs: {mtime: new Date()},
     }];
     adapter.list().then(function () {
-      assert.equal(adapter.ui.output, '\nFound the following revisions:\n\nfile\n\n');
+      assert.equal(adapter.ui.output,
+                   '\nFound the following revisions:\n\nfile\n\n');
       done();
     }).catch(function (error) {
       done(error);
@@ -152,7 +155,8 @@ suite('list', function () {
       attrs: {mtime: new Date(2000, 1, 1)},
     }];
     adapter.list().then(function () {
-      assert.equal(adapter.ui.output, '\nFound the following revisions:\n\nfile2\nfile1\nfile3\n\n');
+      assert.equal(adapter.ui.output,
+                   '\nFound the following revisions:\n\nfile2\nfile1\nfile3\n\n');
       done();
     }).catch(function (error) {
       done(error);
@@ -211,7 +215,10 @@ suite('activate', function () {
       taggingAdapter: new MockTaggingAdapter(),
     });
     unlinkedFile = 'remoteDir/index.html';
-    linkedFile = {source: 'remoteDir/000000.html', destination: 'remoteDir/index.html'};
+    linkedFile = {
+      source: 'remoteDir/000000.html',
+      destination: 'remoteDir/index.html',
+    };
   });
 
   test('missing revision', function (done) {
