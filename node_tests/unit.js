@@ -52,10 +52,13 @@ MockSFTP.prototype.readdir = function (dir, func) {
 };
 
 MockSFTP.prototype.unlink = function (file, func) {
+  assert.equal(file, unlinkedFile);
   func(null);
 };
 
-MockSFTP.prototype.symlink = function (file, func) {
+MockSFTP.prototype.symlink = function (source, destination, func) {
+  assert.equal(source, linkedFile.source);
+  assert.equal(destination, linkedFile.destination);
   func(null);
 };
 
@@ -82,6 +85,8 @@ var stubConfig = {
 var fileContents;
 var filePath = 'remoteDir/000000.html';
 var fileList;
+var unlinkedFile;
+var linkedFile;
 
 suite('list', function () {
 
@@ -185,6 +190,48 @@ suite('upload', function () {
     }];
     adapter.upload(fileContents).then(function () {
       assert.equal(adapter.ui.output, '');
+      done();
+    }).catch(function (error) {
+      done(error);
+    });
+  });
+
+});
+
+
+suite('activate', function () {
+
+  setup(function() {
+    adapter = new SSHAdapter({
+      ui: new MockUI(),
+      config: stubConfig,
+      taggingAdapter: new MockTaggingAdapter(),
+    });
+    unlinkedFile = 'remoteDir/index.html';
+    linkedFile = {source: 'remoteDir/000000.html', destination: 'remoteDir/index.html'};
+  });
+
+  test('missing revision', function (done) {
+    fileList = [{
+      filename: '000000.html',
+      attrs: {mtime: new Date()},
+    }];
+    adapter.activate('000001').catch(function (error) {
+      assert.equal(error.name, 'SilentError');
+      assert.equal(error.message, "Revision doesn't exist");
+      done();
+    }).catch(function (error) {
+      done(error);
+    });
+  });
+
+  test('successfully', function (done) {
+    fileList = [{
+      filename: '000000.html',
+      attrs: {mtime: new Date()},
+    }];
+    adapter.activate('000000').then(function () {
+      assert.equal(adapter.ui.output, 'Revision activated: 000000\n');
       done();
     }).catch(function (error) {
       done(error);
