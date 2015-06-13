@@ -8,7 +8,19 @@
   "scripts": {
     "start": "ember server",
     "build": "ember build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "multi='dot=- html-cov=coverage.html' mocha -R mocha-multi --no-colors -u tdd ./node_tests/"
+  },
+  "config": {
+    "blanket": {
+      "pattern": "//\/[\\w-]+\\.js$/",
+      "data-cover-never": [
+        "node_modules",
+        "public"
+      ],
+      "data-cover-reporter-options": {
+        "shortnames": true
+      }
+    }
   },
   "repository": "https://github.com/treyhunner/ember-deploy-ssh-index/",
   "engines": {
@@ -17,6 +29,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "blanket": "^1.1.6",
     "broccoli-asset-rev": "^2.0.0",
     "broccoli-ember-hbs-template-compiler": "^1.6.1",
     "ember-cli": "0.1.15",
@@ -31,7 +44,9 @@
     "ember-data": "1.0.0-beta.14.1",
     "ember-export-application-global": "^1.0.2",
     "express": "^4.8.5",
-    "glob": "^4.0.5"
+    "glob": "^4.0.5",
+    "mocha": "^2.2.1",
+    "proxyquire": "^1.4.0"
   },
   "keywords": [
     "ember-addon",
