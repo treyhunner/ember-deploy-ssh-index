@@ -24,7 +24,7 @@ To set configuration variables, follow the instructions in the [ember-cli-deploy
 
 Example `config/deploy.js` file using ember-deploy-ssh-index with [ember-deploy-s3][] and environment variables to store the private key file and AWS information:
 
-```
+```javascript
 /* jshint node: true */
 
 module.exports = {
@@ -48,7 +48,7 @@ module.exports = {
 
 You will probably need to prefix your static asset links with a URL based on your asset deploy plugin.  For example if you are using [ember-deploy-s3][] with a bucket named `assets.example.com` you might fingerprint like this:
 
-```
+```javascript
 var app = new EmberApp({
   fingerprint: {
     prepend: 'https://s3.amazonaws.com/assets.example.com/',
