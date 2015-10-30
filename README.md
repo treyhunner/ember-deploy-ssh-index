@@ -16,6 +16,7 @@ To use this plugin, set `type` to `"ssh"` in your [ember-cli-deploy][] configura
 The following configuration options are supported by this plugin:
 
 - `host`: SSH host server
+- `port`: SSH port
 - `username`: SSH user
 - `remoteDir`: Remote directory to upload index pages
 - `privateKeyFile`: local private key file to use for SSH connection
