@@ -3,26 +3,43 @@
 require('blanket')();
 
 var assert = require('assert');
-var CoreObject = require('core-object');
 var EventEmitter = require('events').EventEmitter;
 var inherits = require('util').inherits;
 var proxyquire = require('proxyquire');
-var MockUI = require('ember-cli/tests/helpers/mock-ui');
-
-var adapter;
+var mockUi = {
+  messages: [],
+  write: function() {},
+  writeLine: function(message) {
+    this.messages.push(message);
+  }
+};
 var stubConfig = {
   host: 'host',
   username: 'username',
   remoteDir: 'remoteDir/',
+  keyPrefix: 'project-name',
+  revisionKey: '000000',
   privateKeyFile: './node_tests/fixtures/privateKeyFile.txt',
 };
+var mockPlugin = {
+  ui: mockUi,
+  readConfig: function(propertyName) {
+    return stubConfig[propertyName];
+  },
+  log: function(message/*, opts*/) {
+    this.ui.write('|    ');
+    this.ui.writeLine('- ' + message);
+  }
+};
+var adapter;
 var fileContents;
-var filePath = 'remoteDir/000000.html';
+var filePath = 'remoteDir/project-name:000000.html';
+var activeFile;
 var fileList;
 var unlinkedFile;
 var linkedFile;
 
-var MockClient, MockStream, MockSFTP, MockTaggingAdapter;
+var MockClient, MockStream, MockSFTP;
 
 MockClient = function () {
   this.config = stubConfig;
@@ -66,6 +83,11 @@ MockSFTP.prototype.readdir = function (dir, func) {
   func(null, fileList);
 };
 
+MockSFTP.prototype.readlink = function (file, func) {
+  assert.equal(file, stubConfig.remoteDir + 'index.html');
+  func(null, activeFile);
+};
+
 MockSFTP.prototype.unlink = function (file, func) {
   assert.equal(file, unlinkedFile);
   func(null);
@@ -76,12 +98,6 @@ MockSFTP.prototype.symlink = function (source, destination, func) {
   assert.equal(destination, linkedFile.destination);
   func(null);
 };
-
-MockTaggingAdapter = CoreObject.extend({
-  createTag: function() {
-    return '000000';
-  },
-});
 
 var mockSSH2 = {
   Client: MockClient,
@@ -95,17 +111,14 @@ suite('list', function () {
 
   setup(function() {
     adapter = new SSHAdapter({
-      ui: new MockUI(),
-      config: stubConfig,
-      taggingAdapter: new MockTaggingAdapter(),
+      plugin: mockPlugin,
     });
   });
 
   test('no files', function (done) {
     fileList = [];
-    adapter.list().then(function () {
-      assert.equal(adapter.ui.output,
-                   '\nFound the following revisions:\n\n\n\n');
+    adapter.fetchRevisions().then(function (revisions) {
+      assert.equal(revisions.length, 0);
       done();
     }).catch(function (error) {
       done(error);
@@ -114,12 +127,12 @@ suite('list', function () {
 
   test('one file', function (done) {
     fileList = [{
-      filename: 'somerev.html',
+      filename: 'project-name:somerev.html',
       attrs: {mtime: new Date()},
     }];
-    adapter.list().then(function () {
-      assert.equal(adapter.ui.output,
-                   '\nFound the following revisions:\n\nsomerev\n\n');
+    adapter.fetchRevisions().then(function (revisions) {
+      assert.equal(revisions.length, 1);
+      assert.equal(revisions[0].revision, 'somerev');
       done();
     }).catch(function (error) {
       done(error);
@@ -128,15 +141,15 @@ suite('list', function () {
 
   test('index file', function (done) {
     fileList = [{
-      filename: 'file.html',
+      filename: 'project-name:file.html',
       attrs: {mtime: new Date()},
     }, {
       filename: 'index.html',
       attrs: {mtime: new Date()},
     }];
-    adapter.list().then(function () {
-      assert.equal(adapter.ui.output,
-                   '\nFound the following revisions:\n\nfile\n\n');
+    adapter.fetchRevisions().then(function (revisions) {
+      assert.equal(revisions.length, 1);
+      assert.equal(revisions[0].revision, 'file');
       done();
     }).catch(function (error) {
       done(error);
@@ -145,45 +158,87 @@ suite('list', function () {
 
   test('multiple files', function (done) {
     fileList = [{
-      filename: 'file1.html',
+      filename: 'project-name:file1.html',
       attrs: {mtime: new Date(2000, 1, 2)},
     }, {
-      filename: 'file2.html',
+      filename: 'project-name:file2.html',
       attrs: {mtime: new Date(2000, 1, 3)},
     }, {
-      filename: 'file3.html',
+      filename: 'project-name:file3.html',
       attrs: {mtime: new Date(2000, 1, 1)},
     }];
-    adapter.list().then(function () {
-      assert.equal(adapter.ui.output,
-                   '\nFound the following revisions:\n\nfile2\nfile1\nfile3\n\n');
+    adapter.fetchRevisions().then(function (revisions) {
+      assert.equal(revisions.length, 3);
+      assert.equal(revisions[0].revision, 'file2');
+      assert.equal(revisions[1].revision, 'file1');
+      assert.equal(revisions[2].revision, 'file3');
       done();
     }).catch(function (error) {
       done(error);
     });
   });
 
+  test('non-revision files', function (done) {
+    fileList = [{
+      filename: 'non-revision.html',
+      attrs: {mtime: new Date()},
+    }, {
+      filename: 'project-name:image.png',
+      attrs: {mtime: new Date()},
+    }, {
+      filename: 'project-name:real-revision.html',
+      attrs: {mtime: new Date()},
+    }];
+    adapter.fetchRevisions().then(function (revisions) {
+      assert.equal(revisions.length, 1);
+      assert.equal(revisions[0].revision, 'real-revision');
+      done();
+    }).catch(function (error) {
+      done(error);
+    });
+  });
+
+  test('active revision', function (done) {
+    fileList = [{
+      filename: 'project-name:rev1.html',
+      attrs: {mtime: new Date(2000, 1, 2)},
+    }, {
+      filename: 'project-name:rev2.html',
+      attrs: {mtime: new Date(2000, 1, 1)},
+    }, {
+      filename: 'index.html',
+      attrs: {mtime: new Date()},
+    }];
+    activeFile = '/remoteDir/project-name:rev1.html';
+    adapter.fetchRevisions().then(function (revisions) {
+      assert.equal(revisions.length, 2);
+      assert.equal(revisions[0].revision, 'rev1');
+      assert.equal(revisions[0].active, true);
+      assert.equal(revisions[1].revision, 'rev2');
+      assert.equal(revisions[1].active, false);
+      done();
+    }).catch(function (error) {
+      done(error);
+    });
+  });
 });
 
 suite('upload', function () {
 
   setup(function() {
     adapter = new SSHAdapter({
-      ui: new MockUI(),
-      config: stubConfig,
-      taggingAdapter: new MockTaggingAdapter(),
+      plugin: mockPlugin,
     });
     fileContents = 'file contents';
   });
 
   test('already uploaded', function (done) {
     fileList = [{
-      filename: '000000.html',
+      filename: 'project-name:000000.html',
       attrs: {mtime: new Date()},
     }];
     adapter.upload(fileContents).catch(function (error) {
-      assert.equal(error.name, 'SilentError');
-      assert.equal(error.message, 'Revision already uploaded.');
+      assert.equal(error, 'Revision already uploaded.');
       done();
     }).catch(function (error) {
       done(error);
@@ -192,11 +247,11 @@ suite('upload', function () {
 
   test('successful', function (done) {
     fileList = [{
-      filename: '000001.html',
+      filename: 'project-name:000001.html',
       attrs: {mtime: new Date()},
     }];
-    adapter.upload(fileContents).then(function () {
-      assert.equal(adapter.ui.output, '');
+    adapter.upload(fileContents).then(function (key) {
+      assert.equal(key, 'project-name:000000');
       done();
     }).catch(function (error) {
       done(error);
@@ -210,25 +265,22 @@ suite('activate', function () {
 
   setup(function() {
     adapter = new SSHAdapter({
-      ui: new MockUI(),
-      config: stubConfig,
-      taggingAdapter: new MockTaggingAdapter(),
+      plugin: mockPlugin,
     });
     unlinkedFile = 'remoteDir/index.html';
     linkedFile = {
-      source: 'remoteDir/000000.html',
+      source: 'remoteDir/project-name:000000.html',
       destination: 'remoteDir/index.html',
     };
   });
 
   test('missing revision', function (done) {
     fileList = [{
-      filename: '000000.html',
+      filename: 'project-name:000000.html',
       attrs: {mtime: new Date()},
     }];
     adapter.activate('000001').catch(function (error) {
-      assert.equal(error.name, 'SilentError');
-      assert.equal(error.message, "Revision doesn't exist");
+      assert.equal(error, 'Revision doesn\'t exist');
       done();
     }).catch(function (error) {
       done(error);
@@ -237,11 +289,11 @@ suite('activate', function () {
 
   test('successfully', function (done) {
     fileList = [{
-      filename: '000000.html',
+      filename: 'project-name:000000.html',
       attrs: {mtime: new Date()},
     }];
-    adapter.activate('000000').then(function () {
-      assert.equal(adapter.ui.output, 'Revision activated: 000000\n');
+    adapter.activate('000000').then(function (output) {
+      assert.equal(output.revisionData.activatedRevisionKey, '000000');
       done();
     }).catch(function (error) {
       done(error);

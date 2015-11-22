@@ -1,5 +1,5 @@
 {
-  "name": "ember-deploy-ssh-index",
+  "name": "ember-cli-deploy-ssh-index",
   "version": "0.0.2",
   "description": "The default blueprint for ember-cli addons.",
   "directories": {
@@ -29,7 +29,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "blanket": "^1.1.6",
+    "blanket": "1.1.6",
     "broccoli-asset-rev": "^2.0.0",
     "broccoli-ember-hbs-template-compiler": "^1.6.1",
     "ember-cli": "0.1.15",
@@ -55,7 +55,7 @@
   ],
   "dependencies": {
     "core-object": "^1.1.0",
-    "ssh2": "^0.4.4",
-    "silent-error": "^1.0.0"
+    "ember-cli-deploy-plugin": "^0.2.0",
+    "ssh2": "^0.4.4"
   }
 }
