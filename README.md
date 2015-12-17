@@ -1,13 +1,14 @@
-# ember-deploy-ssh-index
+# ember-cli-deploy-ssh-index
 
-[![NPM Version](https://img.shields.io/npm/v/ember-deploy-ssh-index.svg)](https://www.npmjs.com/package/ember-deploy-ssh-index) [![Build Status](https://img.shields.io/travis/treyhunner/ember-deploy-ssh-index/master.svg)](http://travis-ci.org/treyhunner/ember-deploy-ssh-index) [![Code Climate](https://img.shields.io/codeclimate/github/treyhunner/ember-deploy-ssh-index.svg)](https://codeclimate.com/github/treyhunner/ember-deploy-ssh-index) [![codecov.io](https://img.shields.io/codecov/c/github/treyhunner/ember-deploy-ssh-index/master.svg)](http://codecov.io/github/treyhunner/ember-deploy-ssh-index?branch=master)
+> An [ember-cli-deploy][] plugin for deploying your index page to a server via SSH.
 
-
-This is an [ember-cli-deploy][] adapter for deploying your index page to a server via SSH. It works with ember-cli-deploy 0.4.x. I don't currently have any plans for 0.5.x compatibility, but would gladly accept a PR for this.
+<hr/>
+**WARNING: This plugin is only compatible with ember-cli-deploy versions >= 0.5.0**
+<hr/>
 
 ## Installation
 
-* `npm install --save-dev ember-deploy-ssh-index`
+* `ember install ember-cli-deploy-ssh-index`
 
 ## Configuration
 
@@ -23,31 +24,36 @@ The following configuration options are supported by this plugin:
 
 To set configuration variables, follow the instructions in the [ember-cli-deploy][] documentation.
 
-Example `config/deploy.js` file using ember-deploy-ssh-index with [ember-deploy-s3][] and environment variables to store the private key file and AWS information:
+Example `config/deploy.js` file using ember-cli-deploy-ssh-index with [ember-cli-deploy-s3][] and environment variables to store the private key file and AWS information:
 
 ```javascript
 /* jshint node: true */
 
-module.exports = {
-  production: {
-    store: {
-      type: "ssh",
+module.exports = function(deployTarget) {
+  var ENV = {
+    build: {
+      environment: deployTarget,
+    },
+    'revision-data': {
+      type: 'git-commit',
+    },
+    'ssh-index': {
       remoteDir: "/var/www/",
       host: "example.com",
       username: "root",
       privateKeyFile: process.env.SSH_KEY_FILE,  # Example: /home/user/.ssh/id_rsa
     },
-    assets: {
-      type: "s3",
+    s3: {
       accessKeyId: process.env.AWS_KEY,
       secretAccessKey: process.env.AWS_SECRET,
       bucket: "assets.example.com",
     }
-  }
+  };
+  return ENV;
 };
 ```
 
-You will probably need to prefix your static asset links with a URL based on your asset deploy plugin.  For example if you are using [ember-deploy-s3][] with a bucket named `assets.example.com` you might fingerprint like this:
+You will probably need to prefix your static asset links with a URL based on your asset deploy plugin.  For example if you are using [ember-cli-deploy-s3][] with a bucket named `assets.example.com` you might fingerprint like this:
 
 ```javascript
 var app = new EmberApp({
@@ -61,9 +67,9 @@ var app = new EmberApp({
 
 ## Usage
 
-* Deploy to production: `ember deploy -e production`
-* List deployed revisions: `ember deploy:list -e production`
-* Activate a revision: `ember deploy:activate --revision $TAG -e production` (where `$TAG` is the tag name)
+* Deploy to production: `ember deploy production`
+* List deployed revisions: `ember deploy:list production`
+* Activate a revision: `ember deploy:activate production --revision=$TAG` (where `$TAG` is the tag name)
 
 
 # License
@@ -72,5 +78,5 @@ This is released under an [MIT license][].
 
 
 [ember-cli-deploy]: https://github.com/ember-cli/ember-cli-deploy
-[ember-deploy-s3]: https://github.com/LevelbossMike/ember-deploy-s3
+[ember-cli-deploy-s3]: https://github.com/ember-cli-deploy/ember-cli-deploy-s3
 [mit license]: http://th.mit-license.org/
