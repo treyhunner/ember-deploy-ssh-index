@@ -38,6 +38,7 @@ var activeFile;
 var fileList;
 var unlinkedFile;
 var linkedFile;
+var existingFile;
 
 var MockClient, MockStream, MockSFTP;
 
@@ -88,9 +89,17 @@ MockSFTP.prototype.readlink = function (file, func) {
   func(null, activeFile);
 };
 
+MockSFTP.prototype.exists = function (file, func) {
+  func(file === existingFile);
+};
+
 MockSFTP.prototype.unlink = function (file, func) {
-  assert.equal(file, unlinkedFile);
-  func(null);
+  if (unlinkedFile) {
+    assert.equal(file, unlinkedFile);
+    func(null);
+  } else {
+    func(new Error('Cannot unlink'));
+  }
 };
 
 MockSFTP.prototype.symlink = function (source, destination, func) {
@@ -267,6 +276,7 @@ suite('activate', function () {
     adapter = new SSHAdapter({
       plugin: mockPlugin,
     });
+    existingFile = 'remoteDir/index.html';
     unlinkedFile = 'remoteDir/index.html';
     linkedFile = {
       source: 'remoteDir/project-name:000000.html',
@@ -281,6 +291,21 @@ suite('activate', function () {
     }];
     adapter.activate('000001').catch(function (error) {
       assert.equal(error, 'Revision doesn\'t exist');
+      done();
+    }).catch(function (error) {
+      done(error);
+    });
+  });
+
+  test('no index.html', function (done) {
+    unlinkedFile = '';
+    existingFile = '';
+    fileList = [{
+      filename: 'project-name:000000.html',
+      attrs: {mtime: new Date()},
+    }];
+    adapter.activate('000000').then(function (output) {
+      assert.equal(output.revisionData.activatedRevisionKey, '000000');
       done();
     }).catch(function (error) {
       done(error);
