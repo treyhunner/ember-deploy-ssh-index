@@ -20,6 +20,7 @@ var stubConfig = {
   keyPrefix: 'project-name',
   revisionKey: '000000',
   privateKeyFile: './node_tests/fixtures/privateKeyFile.txt',
+  password: 'password123'
 };
 var mockPlugin = {
   ui: mockUi,
@@ -51,6 +52,7 @@ inherits(MockClient, EventEmitter);
 MockClient.prototype.connect = function (config) {
   assert.equal(config.host, this.config.host);
   assert.equal(config.username, this.config.username);
+  assert.equal(config.password, this.config.password);
   this.emit('ready');
 };
 
@@ -115,6 +117,7 @@ var mockSSH2 = {
 var SSHAdapter = proxyquire('../lib/ssh-adapter', {
   'ssh2': mockSSH2,
 });
+
 
 suite('list', function () {
 
@@ -324,5 +327,4 @@ suite('activate', function () {
       done(error);
     });
   });
-
 });
